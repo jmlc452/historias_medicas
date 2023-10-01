@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% crispy example_form example_form.helper %}
+
+{% block content %}
+<div class="row m-2">
+    <div class="col-1">
+        <a class="btn btn-primary" href="{% url 'inicio' %}">Volver</a>
+    </div>
+    <div class="col-11">
+        <h1>Historias de {{ paciente.nombre }} {{ paciente.apellido }}</h1>
+    </div>
+</div>
+
+<p class="d-inline-flex gap-1">
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+      Registrar Nueva Historia
+    </button>
+    <a href="{% url 'pdf' paciente.id %}" class="btn btn-primary" type="button" >
+      Informe
+    </a>
+  </p>
+  <div class="collapse" id="collapseExample">
+    <form action="{% url 'registro_his' paciente.id %}" method="post">
+        {% csrf_token %}
+        {% crispy form %}
+    </form>
+  </div>
+ 
+<div class="row">
+    <div class="col-4">
+        <h2>Historias Existentes</h2>
+
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for historia in historias %}
+                <tr>
+                    <th scope="row"><a href="{% url 'historias_por_paciente' paciente.id historia.id %}">{{ historia.creacion.day }}/{{ historia.creacion.month }}/{{ historia.creacion.year }}</a></th>
+                  </tr>
+                {% endfor %}
+              
+            </tbody>
+          </table>
+    </div>
+    <div class="col-8">
+      {% if historia_id %}
+      <form action="{% url 'editar_registro_historia' paciente.id historia_id %}" method="post">
+        {% csrf_token %}
+        {% crispy form_his %}
+      </form>
+      {% endif %}
+    </div>
+</div>
+
+
+{% endblock content %}

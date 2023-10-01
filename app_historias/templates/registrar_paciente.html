@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% crispy example_form example_form.helper %}
+
+{% block content %}
+<div class="col-1">
+    <a class="btn btn-primary" href="{% url 'inicio' %}">Volver</a>
+</div>
+<div class="container mt-4">
+    <form action="" method="post">
+        <div class="row">
+            {% csrf_token %}
+            {% crispy form %}
+        </div>
+    </form>
+
+</div>
+{% endblock content %}
