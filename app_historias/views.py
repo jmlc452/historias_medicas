@@ -35,7 +35,7 @@ def index(request):
         pacientes = Registro_Paciente.objects.filter(
             Q(nombre__icontains=search_query) |
             Q(apellido__icontains=search_query) |
-            Q(cedula__icontains=search_query)
+            Q(cedula_madre__icontains=search_query)
         )
     else:
         pacientes = Registro_Paciente.objects.all()
