@@ -13,7 +13,6 @@ class Registro_Paciente(models.Model):
     telefono=models.CharField(max_length=50, blank=True, null=True)
     REF_Dr = models.CharField( max_length=50, blank=True, null=True)
     nombre_madre=models.CharField(max_length=50, blank=True, null=True)
-    cedula_madre=models.CharField(max_length=50)
     email = models.EmailField(max_length=254 , blank=True, null=True)
     antecedentes_personales = models.TextField(blank=True, null=True)
     pn=models.CharField(max_length=50, blank=True, null=True)
@@ -32,10 +31,11 @@ class Registro_Paciente(models.Model):
         return self.nombre
 
 class Registro_Historia(models.Model):
-    peso = models.FloatField( blank=True, null=True)
+    peso = models.CharField(max_length=20, blank=True, null=True)
     talla = models.CharField( max_length=50, blank=True, null=True)
     ta = models.CharField( max_length=50, blank=True, null=True)
-    examen_fisico = models.CharField( max_length=100, blank=True, null=True)
+    examen_fisico = models.TextField( blank=True, null=True)
+    evolucion_paciente = models.TextField( blank=True, null=True, verbose_name="Evolución del paciente")
     laboratorio_ingreso=models.TextField(blank=True, null=True)
     dx_ingreso=models.TextField(blank=True, null=True)
     plan=models.TextField(blank=True, null=True)

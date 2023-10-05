@@ -16,9 +16,11 @@
     <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
       Registrar Nueva Historia
     </button>
-    <a href="{% url 'pdf' paciente.id %}" class="btn btn-primary" type="button" >
-      Informe
-    </a>
+    
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+      Crear Informe
+    </button>
   </p>
   <div class="collapse" id="collapseExample">
     <form action="{% url 'registro_his' paciente.id %}" method="post">
@@ -55,6 +57,32 @@
       </form>
       {% endif %}
     </div>
+</div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel"></h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Escoge por donde obtener el informe
+      </div>
+      <div class="modal-footer">
+        <a href="{% url 'pdf' paciente.id %}" class="btn btn-primary" type="button" >
+          Eviar Por Correo
+        </a>
+        <a href="{% url 'openpdf' paciente.id %}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+          Imprimir
+        </a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 

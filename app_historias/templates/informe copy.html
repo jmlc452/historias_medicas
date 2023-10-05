@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bootstrap demo</title>
+  </head>
+  <body>
+    <div>
+      <div style="text-align: center;">
+        <h1 style="margin-bottom: 30px; font-size: 30px;" class="text-center">Dra. Vianey Leal L.</h1>
+        <h1 style=" font-size: 25px;">Pediatra - Nefrólogo</h1>
+        <h1 style="font-size: 20px;">Informe Medico</h1>
+      </div>
+      <div style="font-size: 15px;margin-left: 50px;">
+          <p style="text-align: left;">
+              Ex. Fisico: <p style="">{{ h.examen_fisico }}</p>
+            </p>
+            <p style="text-align: left;">
+                Laboratorio ingreso: <p style="">{{ h.laboratorio_ingreso }}</p>
+            </p>
+            <p style="text-align: left;">
+                Dx Ingreso: <p style="">{{ h.dx_ingreso }}</p>
+            </p>
+            <p style="text-align: left;">
+                Plan: <p style="">{{ h.plan }}</p>
+            </p>
+        </div>
+    </div>
+
+    <footer style="margin-top: 80px;">
+      <div style="text-align: center;font-size: 15px;">
+        <p style="margin-right: 100px;margin-bottom: -45px;text-align: right;">Fecha: {{ h.creacion.day }}/{{ h.creacion.month }}/{{ h.creacion.year }}</p>
+        <p style="margin-right: 100px;text-align: right;">C.I.: 4.316.788 M.S.A.S.: 20825</p>
+        <p></p>
+        <p>CLINICA EL AVILA. Av. San Juan Bosco con Sexta Transversal, Altamira, Piso 10, Consult 1015.</p>
+        <p>Telf: 0212 - 276.10.85 / Cel: 0416 - 630.12.82 E-mail: vianneymargaritaleal@gmail.com</p>
+        <p></p>
+      </div>
+    </footer>
+  </body>
+</html>

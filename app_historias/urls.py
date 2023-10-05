@@ -11,6 +11,6 @@ urlpatterns = [
     path('detalles/<int:pac_id>/', views.detalles_paciente, name='detalles_paciente'),
     path('editar_registro_historia/<int:paciente_id>/<int:historia_id>/',views.editar_registro_historia,name='editar_registro_historia'),
     path('editar_registro_historia/<int:paciente_id>/',views.editar_registro_historia,name='editar_registro_historia'),
-    path('pdf/<int:paciente_id>/',views.render_pdf_view,name='pdf'),
     path('descargar_archivo/', views.descargar_archivo, name='descargar_archivo'),
+    
 ]

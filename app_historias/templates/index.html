@@ -29,7 +29,6 @@
                     <th scope="col">#</th>
                     <th scope="col">Nombre</th>
                     <th scope="col">Apellido</th>
-                    <th scope="col">Cedula</th>
                     <th scope="col">Control</th>
                 </tr>
             </thead>
@@ -42,7 +41,6 @@
             <th scope="row">{{p.id}}</th>
             <td>{{p.nombre}}</td>
             <td>{{p.apellido}}</td>
-            <td>{{p.cedula_madre}}</td>
             <td style="width: 300px;">
                 <a class="btn btn-success" href="{% url 'historias_por_paciente' p.id %}">Ver Historia</a>
                 <a class="btn btn-success" href="{% url 'detalles_paciente' p.id %}">Ver Datos</a>

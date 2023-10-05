@@ -6,15 +6,8 @@ from .forms import RegistroPacienteForm, RegistroHistoriaForm
 from .models import Registro_Paciente, Registro_Historia
 import os
 from django.conf import settings
-from django.template.loader import get_template
-from xhtml2pdf import pisa
-from django.contrib.staticfiles import finders
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication 
 import mimetypes
-
-# Create your views here.
+import datetime
 
 def descargar_archivo(request):
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,8 +17,14 @@ def descargar_archivo(request):
     with open(filepath, 'rb') as archivo:
         mime_type, _ = mimetypes.guess_type(filepath)
         response = HttpResponse(archivo.read(), content_type=mime_type)
-        response['Content-Disposition'] = f"attachment; filename={filename}"
+        #response['Content-Disposition'] = f"attachment; filename={filename}"
+        print(datetime.datetime.now)
+        response['Content-Disposition'] = f"attachment; filename=respaldo_{request.user.username}_{datetime.datetime.now()}.sqlite3"
         return response
+
+
+
+# Create your views here.
 
 @login_required(login_url='signin')
 def index(request):
@@ -34,8 +33,7 @@ def index(request):
     if search_query:
         pacientes = Registro_Paciente.objects.filter(
             Q(nombre__icontains=search_query) |
-            Q(apellido__icontains=search_query) |
-            Q(cedula_madre__icontains=search_query)
+            Q(apellido__icontains=search_query)
         )
     else:
         pacientes = Registro_Paciente.objects.all()
@@ -115,112 +113,5 @@ def historias_por_paciente(request, paciente_id,historia_id=None):
     # kit.sendwhatmsg_instantly(numero_telefono, mensaje,1)
     historias = Registro_Historia.objects.filter(paciente=paciente)
     return render(request, 'historias_por_paciente.html', {'paciente': paciente, 'historias': reversed(historias), 'form': form, 'form_his':form_his, 'historia_id':historia_id})
-
-
-
-def link_callback(uri, rel):
-    """
-    Convert HTML URIs to absolute system paths so xhtml2pdf can access those
-    resources
-    """
-    result = finders.find(uri)
-    if result:
-            if not isinstance(result, (list, tuple)):
-                    result = [result]
-            result = list(os.path.realpath(path) for path in result)
-            path=result[0]
-    else:
-            sUrl = settings.STATIC_URL        # Typically /static/
-            sRoot = settings.STATIC_ROOT      # Typically /home/userX/project_static/
-            mUrl = settings.MEDIA_URL         # Typically /media/
-            mRoot = settings.MEDIA_ROOT       # Typically /home/userX/project_static/media/
-
-            if uri.startswith(mUrl):
-                    path = os.path.join(mRoot, uri.replace(mUrl, ""))
-            elif uri.startswith(sUrl):
-                    path = os.path.join(sRoot, uri.replace(sUrl, ""))
-            else:
-                    return uri
-
-    # make sure that file exists
-    if not os.path.isfile(path):
-            raise Exception(
-                    'media URI must start with %s or %s' % (sUrl, mUrl)
-            )
-    return path
-
-def render_pdf_view(request,paciente_id):
-
-    paciente=get_object_or_404(Registro_Paciente, id=paciente_id)
-    historia = Registro_Historia.objects.filter(paciente=paciente).last
-    template_path = 'informe.html'
-    context = {'p': paciente,'h': historia}
-    # Create a Django response object, and specify content_type as pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="report.pdf"'
-    # find the template and render it.
-    template = get_template(template_path)
-    html = template.render(context)
-
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-        html, dest=response, link_callback=link_callback)
-    print(response.content)
-    if pisa_status.err:
-       return HttpResponse('We had some errors <pre>' + html + '</pre>')
-   
-     # Definir la ruta donde se guardará el archivo PDF en la raíz del proyecto
-    pdf_filename = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'report.pdf')
-
-    # Guardar el archivo PDF en la ruta especificada
-    with open(pdf_filename, 'wb') as pdf_file:
-        pdf_file.write(response.content)
-
-    # Llamar a la función para enviar el correo electrónico
-    enviar_correo(paciente.email, pdf_filename)
-    
-    # Eliminar el archivo PDF después de enviarlo por correo
-    if os.path.exists(pdf_filename):
-        os.remove(pdf_filename)
-    
-    return redirect('historias_por_paciente', paciente_id=paciente_id)
-
-def enviar_correo(email_to,pdf,):
-    email_address = settings.GMAIL_ORIGIN
-    email_password = settings.GMAIL_PASSWORD
-    
-    # Crea el objeto MIMEMultipart
-    msg = MIMEMultipart()
-    msg['From'] = email_address
-    msg['To'] = email_to
-    msg['Subject'] = 'Informe'
-
-    # Adjunta el archivo PDF
-    pdf_file = pdf  # Cambia esto al nombre de tu archivo PDF
-    with open(pdf_file, 'rb') as attachment:
-        pdf_attach = MIMEApplication(attachment.read(), _subtype="pdf")
-        pdf_attach.add_header('Content-Disposition', f'attachment; filename={pdf_file}')
-        msg.attach(pdf_attach)
-        
-    # Conecta al servidor SMTP de Gmail
-    try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(email_address, email_password)
-    except Exception as e:
-        print(f"No se pudo conectar al servidor SMTP: {e}")
-        
-    # Envía el correo electrónico
-    try:
-        server.sendmail(email_address, email_to, msg.as_string())
-        print('Correo enviado con éxito')
-    except Exception as e:
-        print(f"No se pudo enviar el correo electrónico: {e}")
-
-    # Cierra la conexión con el servidor SMTP
-    server.quit()
-
-
-
 
 
