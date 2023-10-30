@@ -11,8 +11,8 @@ from django.contrib.staticfiles import finders
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication 
-# import pdfkit
-# Create your views here.
+import pdfkit
+
 
 
 def link_callback(uri, rel):
@@ -46,7 +46,8 @@ def link_callback(uri, rel):
             )
     return path
 
-def render_pdf_view(request,paciente_id):
+
+def render_pdf_view(request,paciente_id): 
 
     paciente=get_object_or_404(Registro_Paciente, id=paciente_id)
     historia = Registro_Historia.objects.filter(paciente=paciente).last
@@ -83,36 +84,6 @@ def render_pdf_view(request,paciente_id):
     return redirect('historias_por_paciente', paciente_id=paciente_id)
     # return response
 
-def render_pdf_open(request,paciente_id):
-
-    paciente=get_object_or_404(Registro_Paciente, id=paciente_id)
-    historia = Registro_Historia.objects.filter(paciente=paciente).last
-    template_path = 'informe copy.html'
-    context = {'p': paciente,'h': historia}
-    # Create a Django response object, and specify content_type as pdf
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="report.pdf"'
-    # find the template and render it.
-    template = get_template(template_path)
-    html = template.render(context)
-
-    # create a pdf
-    pisa_status = pisa.CreatePDF(
-        html, dest=response, link_callback=link_callback)
-    print(response.content)
-    if pisa_status.err:
-       return HttpResponse('We had some errors <pre>' + html + '</pre>')
-   
-     # Definir la ruta donde se guardará el archivo PDF en la raíz del proyecto
-    pdf_filename = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'report.pdf')
-
-    # Guardar el archivo PDF en la ruta especificada
-    with open(pdf_filename, 'wb') as pdf_file:
-        pdf_file.write(response.content)
-
-    # Llamar a la función para enviar el correo electrónico
-    enviar_correo(paciente.email, pdf_filename)
-    
     # Eliminar el archivo PDF después de enviarlo por correo
     if os.path.exists(pdf_filename):
         os.remove(pdf_filename)
@@ -156,7 +127,9 @@ def enviar_correo(email_to,pdf,):
     server.quit()
 
 
-# def open_pdf_view(request, paciente_id):
+# def render_pdf_open(request, paciente_id):
+#     path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+#     config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
 #     paciente = get_object_or_404(Registro_Paciente, id=paciente_id)
 #     historia = Registro_Historia.objects.filter(paciente=paciente).last()
 #     template_path = 'informe copy.html'
@@ -171,12 +144,14 @@ def enviar_correo(email_to,pdf,):
 #     html = template.render(context)
 #     path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
 #     config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+#     css_path=r'C:\Users\Jorge Ribas\Desktop\historias_medicas\app_historias\static\style.css'
 #     # create a pdf
 #     pdf_options = {
 #         'page-size': 'A4',
 #         'encoding': 'UTF-8',
 #     }
-#     pdfkit.from_string(html, pdf_path, options=pdf_options,configuration=config)
+#     # pdfkit.from_string(html, pdf_path, options=pdf_options,configuration=config,css=css_path)
+#     pdfkit.from_url('https://pypi.org/project/pdfkit/', 'out.pdf')
 
 #     # Devolver el PDF como una descarga
 #     with open(pdf_path, 'rb') as pdf_file:
@@ -184,5 +159,31 @@ def enviar_correo(email_to,pdf,):
 #         response['Content-Disposition'] = f'inline; filename="{pdf_filename}"'
 #         return response
 
+def generar_informe(request,paciente_id):
+    paciente = get_object_or_404(Registro_Paciente, id=paciente_id)
+    historia = Registro_Historia.objects.filter(paciente=paciente).last()
+    return render(request,'informe copy.html',{'p': paciente, 'h': historia})
 
+def render_pdf_open(request, paciente_id):
+    path_wkthmltopdf = r'C:\Users\viann\OneDrive\Escritorio\historias_medicas\wkhtmltopdf\bin\wkhtmltopdf.exe'
+    config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+
+    # Generar un nombre de archivo único para el PDF
+    pdf_filename = f'report_{paciente_id}.pdf'
+    pdf_path = os.path.join(settings.MEDIA_ROOT, pdf_filename)
+
+    # create a pdf
+    pdf_options = {
+        'page-size': 'A4',
+        'encoding': 'UTF-8',
+    }
+    # render(request,'informe copy.html',{'p': paciente, 'h': historia})
+    # pdfkit.from_string(html, pdf_path, options=pdf_options,configuration=config,css=css_path)
+    pdfkit.from_url(f'http://127.0.0.1:8000/informes/genpdf/{paciente_id}/', pdf_filename,configuration=config,options=pdf_options)
+
+        # Devolver el PDF como una descarga
+    with open(pdf_path, 'rb') as pdf_file:
+        response = HttpResponse(pdf_file.read(), content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="{pdf_filename}"'
+        return response
 
