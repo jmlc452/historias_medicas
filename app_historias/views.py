@@ -8,6 +8,9 @@ import os
 from django.conf import settings
 import mimetypes
 import datetime
+import platform
+
+
 
 def descargar_archivo(request):
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -37,7 +40,10 @@ def index(request):
         )
     else:
         pacientes = Registro_Paciente.objects.all()
-      
+    
+    print("Nombre del sistema operativo:", platform.system())
+    print("Versión del sistema operativo:", platform.release())
+    print("Arquitectura del sistema:", platform.architecture())
     return render(request, 'index.html', {'pacientes': reversed(pacientes)})
 
 def detalles_paciente(request, pac_id):
@@ -101,17 +107,12 @@ def historias_por_paciente(request, paciente_id,historia_id=None):
     else:
         historia = ''
         form_his = ''
-    # import pywhatkit as kit
-
-    # # Número de teléfono al que deseas enviar el mensaje (con el código de país, sin espacios ni caracteres especiales)
-    # numero_telefono = "+584243391569"
-
-    # # Mensaje que deseas enviar
-    # mensaje = "¡Hola desde Python!"
-
-    # Envía el mensaje de WhatsApp inmediatamente
-    # kit.sendwhatmsg_instantly(numero_telefono, mensaje,1)
     historias = Registro_Historia.objects.filter(paciente=paciente)
     return render(request, 'historias_por_paciente.html', {'paciente': paciente, 'historias': reversed(historias), 'form': form, 'form_his':form_his, 'historia_id':historia_id})
 
-
+def eliminar_registro(request, paciente_id,historia_id = None):
+    paciente = get_object_or_404(Registro_Historia, pk=historia_id)
+    
+    paciente.delete()
+        
+    return redirect('historias_por_paciente', paciente_id=paciente_id)
